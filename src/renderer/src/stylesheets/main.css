@@ -1,0 +1,86 @@
+@import './base.css';
+@import "tailwindcss";
+
+body {
+  display: block;
+  overflow: hidden;
+  user-select: none;
+  font-family: "Roboto", Arial, Helvetica, sans-serif;
+}
+
+code {
+  font-weight: 600;
+  padding: 3px 5px;
+  border-radius: 2px;
+  background-color: var(--color-background-mute);
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
+  font-size: 85%;
+}
+
+#root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-bottom: 80px;
+  min-height: 100vh;
+}
+
+.text {
+  font-size: 28px;
+  color: var(--ev-c-text-1);
+  font-weight: 700;
+  line-height: 32px;
+  text-align: center;
+  margin: 0 10px;
+  padding: 16px 0;
+}
+
+@layer components {
+  .btn {
+    @apply rounded p-3 bg-slate-800 hover:bg-slate-600 active:bg-slate-400 text-center hover:outline-2 outline-slate-400 transition-colors duration-200 ease-out cursor-pointer
+  }
+
+  .btn.disabled {
+    @apply bg-gray-900 text-gray-600 pointer-events-none
+  }
+
+  .btn.primary {
+    @apply bg-blue-800 hover:bg-blue-600 outline-blue-400
+  }
+
+  .btn.success {
+    @apply bg-green-800 hover:bg-green-600 outline-green-400
+  }
+
+  .btn.danger {
+    @apply bg-red-800 hover:bg-red-600 outline-red-400
+  }
+}
+
+@media (max-width: 720px) {
+  .text {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 620px) {
+  .versions {
+    display: none;
+  }
+}
+
+@media (max-width: 350px) {
+
+  .tip,
+  .actions {
+    display: none;
+  }
+}
