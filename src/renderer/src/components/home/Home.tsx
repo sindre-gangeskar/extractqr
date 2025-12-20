@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import fallbackImage from '@renderer/public/no_preview.jpg'
@@ -9,8 +9,10 @@ export default function Home() {
   const [status, setStatus] = useState<IPCResponse['status']>(undefined)
   const [responseMessage, setResponseMessage] = useState<string | null>(null)
   const [submitEnabled, setSubmitEnabled] = useState<boolean>(false)
-  const [clipboardCopied, setClipboardCopied] = useState<boolean>(false)
+  const [clipboardState, toggleClipboardState] = useState<boolean | null>(null)
+  const tlRef = useRef<gsap.core.Timeline | null>(null)
   const extractQRBtnText = 'Extract QR code from image'
+
   const handlePreview = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target?.files?.[0]
     if (!file) return
@@ -47,7 +49,6 @@ export default function Home() {
       })) as IPCResponse
       setStatus(response.status)
       setSubmitEnabled(false)
-      setClipboardCopied(false)
       response.data ? setData(response.data) : setData(null)
       if (response.message) setResponseMessage(response.message)
     }
@@ -55,7 +56,7 @@ export default function Home() {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(data ?? '')
-    setClipboardCopied((prev) => !prev)
+    toggleClipboardState((prev) => !prev)
   }
 
   useGSAP(() => {
@@ -63,6 +64,16 @@ export default function Home() {
     gsap.set('#preview-img', { opacity: 0 })
     gsap.to('#preview-img', { opacity: 1, duration: 0.8, ease: 'power4.out' })
   }, [preview])
+
+  useGSAP(() => {
+    if (clipboardState === null || !data) return
+    tlRef.current?.kill()
+    const tl = gsap.timeline()
+    tlRef.current = tl
+    tl.set('#clipboard-message', { y: 0, opacity: 0, zIndex: -1 })
+    tl.to('#clipboard-message', { y: 50, duration: 0.6, ease: 'power3.out', opacity: 1 })
+    tl.to('#clipboard-message', { duration: 0.6, ease: 'power3.out', opacity: 0, delay: 3 })
+  }, [clipboardState])
   return (
     <div className="flex flex-col gap-12">
       {preview && (
@@ -99,13 +110,18 @@ export default function Home() {
           {data ? data : null}
         </p>
       </div>
-      {status === 'success' && (
-        <button
-          className={`btn ${clipboardCopied ? 'success' : 'primary'} mx-auto`}
-          onClick={copyToClipboard}
-        >
-          {clipboardCopied ? 'Copied to clipboard' : 'Copy To Clipboard'}
-        </button>
+      {data && status === 'success' && (
+        <div className="clipboard-wrapper flex flex-col gap-2 justify-center items-center">
+          <button className={`btn primary mx-auto`} onClick={copyToClipboard}>
+            Copy To Clipboard
+          </button>
+          <p
+            id="clipboard-message"
+            className=" text-green-200 p-3 rounded-full text-[12px] absolute opacity-0 pointer-events-none"
+          >
+            Copied to clipboard
+          </p>
+        </div>
       )}
     </div>
   )
