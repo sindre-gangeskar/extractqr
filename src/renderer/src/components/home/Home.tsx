@@ -29,7 +29,6 @@ export default function Home() {
     const file = input?.files?.[0]
     if (!file) return
     const img = new Image()
-    if (!img) return
     img.src = URL.createObjectURL(file)
     img.onload = async () => {
       const canvas = document.createElement('canvas')
