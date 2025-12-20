@@ -7,14 +7,18 @@ export default function Home() {
   const [data, setData] = useState<string | null>(null)
   const [preview, setPreview] = useState<string | null>(fallbackImage)
   const [status, setStatus] = useState<IPCResponse['status']>(undefined)
+  const [responseMessage, setResponseMessage] = useState<string | null>(null)
   const [submitEnabled, setSubmitEnabled] = useState<boolean>(false)
   const [clipboardCopied, setClipboardCopied] = useState<boolean>(false)
+  const extractQRBtnText = 'Extract QR code from image'
   const handlePreview = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target?.files?.[0]
     if (!file) return
     const url = URL.createObjectURL(file)
     setPreview(url)
     setSubmitEnabled(true)
+    setResponseMessage(extractQRBtnText)
+    setData(null)
   }, [])
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,7 +48,8 @@ export default function Home() {
       setStatus(response.status)
       setSubmitEnabled(false)
       setClipboardCopied(false)
-      if (response.data) setData(response.data)
+      response.data ? setData(response.data) : setData(null)
+      if (response.message) setResponseMessage(response.message)
     }
   }, [])
 
@@ -84,25 +89,24 @@ export default function Home() {
           Select Image
         </label>
         <button className={`btn ${submitEnabled === true ? 'primary' : 'disabled'}`} type="submit">
-          Extract QR data from image
+          {responseMessage ? responseMessage : 'Extract QR data from image'}
         </button>
       </form>
       <div className="data-container w-100 self-center min-h-max flex">
         <p
           className={`max-h-52 h-max p-3 w-100 whitespace-normal wrap-anywhere text-ellipsis overflow-hidden ${data && status === 'success' ? '' : 'text-center'} ${status === 'success' ? 'text-sky-300' : 'text-red-300'}`}
         >
-          {data ?? 'QR data will be shown here...'}
+          {data ? data : null}
         </p>
       </div>
       {status === 'success' && (
         <button
-          className={`btn ${clipboardCopied ? 'disabled' : 'primary'} mx-auto`}
+          className={`btn ${clipboardCopied ? 'success' : 'primary'} mx-auto`}
           onClick={copyToClipboard}
         >
-          Copy To Clipboard
+          {clipboardCopied ? 'Copied to clipboard' : 'Copy To Clipboard'}
         </button>
       )}
-      {clipboardCopied && <p className="text-center p-0 mt-24">Copied to clipboard</p>}
     </div>
   )
 }

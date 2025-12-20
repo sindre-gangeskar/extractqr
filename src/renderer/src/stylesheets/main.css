@@ -43,17 +43,29 @@ code {
   padding: 16px 0;
 }
 
+.titlebar {
+  -webkit-app-region: drag;
+}
+
+.no-drag{
+  -webkit-app-region: no-drag;
+}
+
 @layer components {
   .btn {
-    @apply rounded p-3 bg-slate-800 hover:bg-slate-600 active:bg-slate-400 text-center hover:outline-2 outline-slate-400 transition-colors duration-200 ease-out cursor-pointer
+    @apply p-3 z-0 bg-neutral-900 outline-neutral-700 hover:bg-neutral-800 active:bg-neutral-600 text-center outline-1 transition-colors duration-200 ease-out cursor-pointer
+  }
+
+  .btn.close{
+    @apply hover:bg-red-900 hover:text-red-200
   }
 
   .btn.disabled {
-    @apply bg-gray-900 text-gray-600 pointer-events-none
+    @apply bg-neutral-950 text-neutral-300 pointer-events-none
   }
 
   .btn.primary {
-    @apply bg-blue-800 hover:bg-blue-600 outline-blue-400
+    @apply bg-blue-900 hover:bg-blue-600 outline-blue-400
   }
 
   .btn.success {
