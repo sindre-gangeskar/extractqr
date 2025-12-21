@@ -83,6 +83,9 @@ app.whenReady().then(() => {
   ipcMain.handle('close', () => {
     app.emit('window-all-closed')
   })
+  ipcMain.handle('get-app-version', () => {
+    return app.getVersion()
+  })
 })
 
 app.on('window-all-closed', () => {

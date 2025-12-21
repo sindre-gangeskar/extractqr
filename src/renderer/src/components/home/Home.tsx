@@ -11,7 +11,7 @@ export default function Home() {
   const [submitEnabled, setSubmitEnabled] = useState<boolean>(false)
   const [clipboardState, toggleClipboardState] = useState<boolean | null>(null)
   const tlRef = useRef<gsap.core.Timeline | null>(null)
-  const extractQRBtnText = 'Extract QR code from image'
+  const extractQRBtnText = 'Extract QR data from image'
 
   const handlePreview = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target?.files?.[0]
@@ -90,7 +90,7 @@ export default function Home() {
           type="file"
           id="image"
           name="qr"
-          accept=".png, .jpg"
+          accept=".png, .jpg, .jpeg, .webp"
           placeholder="Select Image"
           hidden
           onChange={handlePreview}
@@ -104,7 +104,7 @@ export default function Home() {
       </form>
       <div className="data-container w-100 self-center min-h-max flex">
         <p
-          className={`max-h-52 h-max p-3 w-100 whitespace-normal wrap-anywhere text-ellipsis overflow-hidden ${data && status === 'success' ? '' : 'text-center'} ${status === 'success' ? 'text-sky-300' : 'text-red-300'}`}
+          className={`max-h-52 h-max p-3 w-100 whitespace-normal wrap-anywhere text-ellipsis overflow-hidden ${data && status === 'success' ? '' : 'text-center'} ${status === 'success' ? 'text-neutral-100' : 'text-red-300'}`}
         >
           {data ? data : null}
         </p>
