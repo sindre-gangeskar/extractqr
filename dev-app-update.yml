@@ -1,4 +1,3 @@
-provider: github
-owner: sindre-gangeskar
+provider: generic
+url: http://localhost:8080
 updaterCacheDirName: extractqr-updater
-repo: extractqr

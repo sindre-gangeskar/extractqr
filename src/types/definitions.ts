@@ -5,3 +5,8 @@ export interface IPCResponse {
   status: StatusType | undefined
   message?: string | null
 }
+
+export interface AutoUpdaterProps {
+  updateAvailable: boolean
+  message: string
+}

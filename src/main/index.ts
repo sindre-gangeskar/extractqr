@@ -1,9 +1,12 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { autoUpdater } from 'electron-updater'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import jsQR from 'jsqr'
 import icon from '../../resources/icon.png?asset'
 import { join } from 'path'
-import { IPCResponse } from '../types/definitions'
+import { AutoUpdaterProps, IPCResponse } from '../types/definitions'
 function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -42,6 +45,47 @@ function createWindow(): BrowserWindow {
 app.whenReady().then(() => {
   const win = createWindow()
   electronApp.setAppUserModelId('com.electron')
+  const updaterData: AutoUpdaterProps = {
+    updateAvailable: false,
+    message: ''
+  }
+  autoUpdater.disableWebInstaller = true
+  if (is.dev) {
+    autoUpdater.forceDevUpdateConfig = true
+    autoUpdater.updateConfigPath = join(__dirname, '..', '..', 'dev-app-update.yml')
+    autoUpdater.disableDifferentialDownload = true
+  }
+
+  autoUpdater.on('update-available', () => {
+    updaterData.message = 'Update available'
+    updaterData.updateAvailable = true
+  })
+
+  autoUpdater.on('checking-for-update', () => {
+    updaterData.message = 'Checking for updates'
+    updaterData.updateAvailable = false
+  })
+
+  autoUpdater.on('update-not-available', () => {
+    updaterData.message = 'Up to date'
+    updaterData.updateAvailable = false
+  })
+
+  autoUpdater.on('download-progress', (progress) => {
+    win.webContents.send('download-progress', progress.percent)
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    win.webContents.send('download-finished', true)
+  })
+
+  autoUpdater.autoDownload = false
+  autoUpdater.checkForUpdates()
+
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.send('check-updates', updaterData)
+  })
+
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
@@ -90,6 +134,13 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('get-app-version', () => {
     return app.getVersion()
+  })
+  ipcMain.handle('download-update', async () => {
+    await autoUpdater.downloadUpdate()
+  })
+  ipcMain.handle('install-update', () => {
+    if (!updaterData.updateAvailable) return
+    autoUpdater.quitAndInstall()
   })
 })
 
