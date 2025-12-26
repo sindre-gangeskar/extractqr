@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+jobs:
+  build-and-publish:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            script: publish:win
+          - os: ubuntu-latest
+            script: publish:linux
+          - os: macos-latest
+            script: publish:mac
+    runs-on: ${{matrix.os}}
+
+    env:
+      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Publish
+        run: npm run ${{matrix.script}}
