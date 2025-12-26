@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import fallbackImage from '@renderer/public/no_preview.jpg'
@@ -58,6 +58,15 @@ export default function Home() {
     toggleClipboardState((prev) => !prev)
   }
 
+  useEffect(() => {
+    const toggleDevtools = (event: KeyboardEvent) => {
+      if (event.key === 'F12') window.electron.ipcRenderer.invoke('toggle-devtools')
+    }
+    window.addEventListener('keydown', toggleDevtools)
+    return () => {
+      window.removeEventListener('keydown', toggleDevtools)
+    }
+  }, [])
   useGSAP(() => {
     if (!preview) return
     gsap.set('#preview-img', { opacity: 0 })
@@ -74,16 +83,18 @@ export default function Home() {
     tl.to('#clipboard-message', { duration: 0.6, ease: 'power3.out', opacity: 0, delay: 3 })
   }, [clipboardState])
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-12 w-fit">
       {preview && (
-        <img
-          src={preview}
-          onError={() => {
-            setPreview(fallbackImage)
-          }}
-          id="preview-img"
-          className="w-100 max-h-62.5 h-full p-2 self-center opacity-0 object-contain"
-        ></img>
+        <div id="img-parent" className="h-full w-full">
+          <img
+            src={preview}
+            onError={() => {
+              setPreview(fallbackImage)
+            }}
+            id="preview-img"
+            className="w-100 h-100 overflow-hidden max-h-62.5 p-2 self-center opacity-0 object-contain rounded-2xl"
+          ></img>
+        </div>
       )}
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <input
@@ -102,7 +113,9 @@ export default function Home() {
           {responseMessage ? responseMessage : 'Extract QR data from image'}
         </button>
       </form>
-      <div className="data-container w-100 self-center min-h-max flex">
+      <div
+        className={`data-container w-100 self-center min-h-fit flex ${data ? 'bg-neutral-800 outline-2 outline-neutral-700' : ''}  rounded`}
+      >
         <p
           className={`max-h-52 h-max p-3 w-100 whitespace-normal wrap-anywhere text-ellipsis overflow-hidden ${data && status === 'success' ? '' : 'text-center'} ${status === 'success' ? 'text-neutral-100' : 'text-red-300'}`}
         >
