@@ -15,7 +15,7 @@ This app is made to keep things simple, it has one purpose and one purpose only.
 ### How to use
 
 - Select the image you want to scan
-- Once image is selected; click "Extract QR data from image"
-- On successful extraction you can copy the text to your clipboard
+- Once an image is selected; click "Extract QR data from image" to extract data
+- On a successful extraction; an option to copy to your clipboard will be available
 
 <img src=".github/demo.jpg" width=400 />
