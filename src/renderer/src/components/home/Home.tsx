@@ -3,6 +3,7 @@ import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import fallbackImage from '@renderer/public/no_preview.jpg'
 import { IPCResponse } from 'src/types/definitions'
+import Toolbar from '../ui/Toolbar'
 export default function Home() {
   const [data, setData] = useState<string | null>(null)
   const [preview, setPreview] = useState<string | null>(fallbackImage)
@@ -135,6 +136,7 @@ export default function Home() {
           </p>
         </div>
       )}
+      <Toolbar />
     </div>
   )
 }

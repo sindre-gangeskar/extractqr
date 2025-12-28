@@ -14,8 +14,8 @@ function createWindow(): BrowserWindow {
     width: 600,
     minHeight: 900,
     minWidth: 600,
-    titleBarStyle: process.platform == 'darwin' ? 'hiddenInset' : 'hidden',
-    frame: false,
+    titleBarStyle: process.platform == 'darwin' ? 'default' : 'hidden',
+    frame: process.platform === 'darwin',
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -42,7 +42,7 @@ function createWindow(): BrowserWindow {
   return mainWindow
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const win = createWindow()
   electronApp.setAppUserModelId('com.electron')
   const updaterData: AutoUpdaterProps = {
@@ -55,51 +55,6 @@ app.whenReady().then(() => {
     autoUpdater.updateConfigPath = join(__dirname, '..', '..', 'dev-app-update.yml')
     autoUpdater.disableDifferentialDownload = true
   }
-
-  autoUpdater.on('update-available', () => {
-    updaterData.message = 'Update available'
-    updaterData.updateAvailable = true
-  })
-
-  autoUpdater.on('checking-for-update', () => {
-    updaterData.message = 'Checking for updates'
-    updaterData.updateAvailable = false
-  })
-
-  autoUpdater.on('update-not-available', () => {
-    updaterData.message = 'Up to date'
-    updaterData.updateAvailable = false
-  })
-
-  autoUpdater.on('download-progress', (progress) => {
-    win.webContents.send('download-progress', progress.percent)
-  })
-
-  autoUpdater.on('update-downloaded', () => {
-    win.webContents.send('download-finished', true)
-  })
-
-  autoUpdater.autoDownload = false
-  autoUpdater.checkForUpdates()
-
-  win.webContents.on('did-finish-load', () => {
-    win.webContents.send('check-updates', updaterData)
-  })
-
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-
-  ipcMain.handle('toggle-devtools', () => {
-    if (!is.dev) return
-    win.webContents.toggleDevTools()
-    win.focus()
-  })
   ipcMain.handle(
     'scan',
     async (_event, imageData: { data: Uint8ClampedArray; width: number; height: number }) => {
@@ -136,11 +91,75 @@ app.whenReady().then(() => {
     return app.getVersion()
   })
   ipcMain.handle('download-update', async () => {
-    await autoUpdater.downloadUpdate()
+    try {
+      await autoUpdater.downloadUpdate()
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
+    }
   })
   ipcMain.handle('install-update', () => {
     if (!updaterData.updateAvailable) return
     autoUpdater.quitAndInstall()
+  })
+
+  autoUpdater.on('update-available', () => {
+    updaterData.message = 'Update available'
+    updaterData.updateAvailable = true
+  })
+
+  autoUpdater.on('checking-for-update', () => {
+    updaterData.message = 'Checking for updates'
+    updaterData.updateAvailable = false
+  })
+
+  autoUpdater.on('update-not-available', () => {
+    updaterData.message = 'Up to date'
+    updaterData.updateAvailable = false
+  })
+
+  autoUpdater.on('error', (err) => {
+    const isConnRefused = err.message.includes('ERR_CONNECTION_REFUSED')
+    if (!isConnRefused) console.error(err.message)
+    else console.log('Failed to fetch updates')
+    updaterData.message = 'Could not fetch updates'
+    updaterData.updateAvailable = false
+    win.webContents.send('check-updates', updaterData)
+  })
+
+  autoUpdater.on('download-progress', (progress) => {
+    win.webContents.send('download-progress', progress.percent)
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    win.webContents.send('download-finished', true)
+  })
+
+  autoUpdater.autoDownload = false
+  try {
+    await autoUpdater.checkForUpdates()
+  } catch (error) {
+    console.error(error)
+  }
+
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.send('check-updates', updaterData)
+  })
+
+  app.on('browser-window-created', (_, window) => {
+    optimizer.watchWindowShortcuts(window)
+  })
+  app.on('activate', function () {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
+
+  ipcMain.handle('toggle-devtools', () => {
+    if (!is.dev) return
+    win.webContents.toggleDevTools()
+    win.focus()
   })
 })
 

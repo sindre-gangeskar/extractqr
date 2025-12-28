@@ -27,6 +27,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@floating-ui/react": "^0.27.16",
     "@gsap/react": "^2.1.2",
     "@tailwindcss/vite": "^4.1.18",
     "@types/gsap": "^3.0.0",

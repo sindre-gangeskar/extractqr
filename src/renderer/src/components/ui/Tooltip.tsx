@@ -1,10 +1,49 @@
-export default function Tooltip({ text }: { text: string }) {
+import { useState } from 'react'
+import { useFloating, offset, flip, shift, autoUpdate, FloatingPortal } from '@floating-ui/react'
+export default function Tooltip({
+  text,
+  placement = 'top',
+  children
+}: {
+  text: string
+  placement?: 'top' | 'bottom' | 'left' | 'right'
+  children?: React.ReactNode
+}) {
+  const [open, setOpen] = useState<boolean>(false)
+  const { refs: floatingRefs, floatingStyles } = useFloating({
+    open,
+    onOpenChange: setOpen,
+    middleware: [offset(8), flip(), shift({ padding: 8 })],
+    whileElementsMounted: autoUpdate,
+    placement: placement
+  })
+
   return (
-    <p
-      id="tooltip"
-      className="absolute top-8 left-[50%] -translate-x-[50%] rounded-2xl p-2 opacity-0 group-hover:opacity-100 group-hover:top-14 text-sm w-fit text-nowrap bg-neutral-700 pointer-events-none transition-all duration-200"
-    >
-      {text}
-    </p>
+    <>
+      <span
+        className="self-center items-center leading-none p-3"
+        ref={floatingRefs.setReference}
+        onMouseEnter={() => {
+          setOpen(true)
+        }}
+        onMouseLeave={() => {
+          setOpen(false)
+        }}
+      >
+        {children}
+      </span>
+      {open && (
+        <FloatingPortal>
+          <div
+            // eslint-disable-next-line react-hooks/refs
+            ref={floatingRefs.setFloating}
+            style={floatingStyles}
+            className="rounded-2xl text-sm text-nowrap pointer-events-none m-0 p-0"
+          >
+            {text}
+          </div>
+        </FloatingPortal>
+      )}
+    </>
   )
 }
