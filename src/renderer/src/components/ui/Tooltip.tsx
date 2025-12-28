@@ -21,7 +21,7 @@ export default function Tooltip({
   return (
     <>
       <span
-        className="self-center items-center leading-none p-3"
+        className="self-center items-center leading-none p-0"
         ref={floatingRefs.setReference}
         onMouseEnter={() => {
           setOpen(true)
