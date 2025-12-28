@@ -16,6 +16,7 @@ export default function Toolbar() {
   useEffect(() => {
     window.electron.ipcRenderer.on('check-updates', (_, data) => {
       if (data) setUpdaterData(data)
+      console.log(data)
     })
 
     window.electron.ipcRenderer.on('download-progress', (_, progress) => {
@@ -32,7 +33,7 @@ export default function Toolbar() {
       className="left-0 absolute bottom-0 w-screen h-4 flex gap-3 justify-between p-5"
     >
       <Version />
-      {updaterData.updateAvailable && !downloadFinished && (
+      {updaterData.updateAvailable && !downloadFinished && !downloadProgress && (
         <DownloadUpdateButton updaterData={updaterData} />
       )}
       {updaterData.updateAvailable && !downloadFinished && downloadProgress && (

@@ -49,6 +49,9 @@ app.whenReady().then(async () => {
     updateAvailable: false,
     message: ''
   }
+  const sendUpdaterData = () => {
+    win.webContents.send('check-updates', updaterData)
+  }
   autoUpdater.disableWebInstaller = true
   if (is.dev) {
     autoUpdater.forceDevUpdateConfig = true
@@ -103,20 +106,28 @@ app.whenReady().then(async () => {
     if (!updaterData.updateAvailable) return
     autoUpdater.quitAndInstall()
   })
+  ipcMain.handle('toggle-devtools', () => {
+    if (!is.dev) return
+    win.webContents.toggleDevTools()
+    win.focus()
+  })
 
   autoUpdater.on('update-available', () => {
     updaterData.message = 'Update available'
     updaterData.updateAvailable = true
+    sendUpdaterData()
   })
 
   autoUpdater.on('checking-for-update', () => {
     updaterData.message = 'Checking for updates'
     updaterData.updateAvailable = false
+    sendUpdaterData()
   })
 
   autoUpdater.on('update-not-available', () => {
     updaterData.message = 'Up to date'
     updaterData.updateAvailable = false
+    sendUpdaterData()
   })
 
   autoUpdater.on('error', (err) => {
@@ -125,7 +136,7 @@ app.whenReady().then(async () => {
     else console.log('Failed to fetch updates')
     updaterData.message = 'Could not fetch updates'
     updaterData.updateAvailable = false
-    win.webContents.send('check-updates', updaterData)
+    sendUpdaterData()
   })
 
   autoUpdater.on('download-progress', (progress) => {
@@ -142,9 +153,8 @@ app.whenReady().then(async () => {
   } catch (error) {
     console.error(error)
   }
-
   win.webContents.on('did-finish-load', () => {
-    win.webContents.send('check-updates', updaterData)
+    sendUpdaterData()
   })
 
   app.on('browser-window-created', (_, window) => {
@@ -154,12 +164,6 @@ app.whenReady().then(async () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-
-  ipcMain.handle('toggle-devtools', () => {
-    if (!is.dev) return
-    win.webContents.toggleDevTools()
-    win.focus()
   })
 })
 
