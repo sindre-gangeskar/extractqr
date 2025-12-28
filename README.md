@@ -6,7 +6,7 @@ Made with Electron, React and TailwindCSS.
 
 ## Why did I make this?
 
-I use a local password database called KeePassXC. Adding MFA to KeePassXC requires the secret string that _sometimes_ comes with a QR code. The QR code itself has that secret, but the QR code is meant to be scanned and added to an authentication app. Without the secret string that some provide along with the QR code; you'll be forced to extract the data yourself.
+I use a local password database called KeePassXC. Adding MFA to KeePassXC requires the secret string that _sometimes_ comes with a QR code. The QR code itself has that secret, but the QR code is meant to be scanned and added to an authentication app. Omitting the secret string in MFA QR codes; forces the users to take action and extract it by themselves.
 
 By extracting the data using an online tool, you potentially expose your QR secret online, which is why I made this app so you can scan your QR codes locally and extract the data safely without having to worry about any data exposure using an online QR reading tool.
 
