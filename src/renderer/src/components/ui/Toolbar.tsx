@@ -4,10 +4,12 @@ import DownloadUpdateButton from './DownloadUpdateButton'
 import InstallUpdateButton from './InstallUpdateButton'
 import Version from './Version'
 import { BiDownload } from 'react-icons/bi'
+import { IoWarning } from 'react-icons/io5'
 export default function Toolbar() {
   const [updaterData, setUpdaterData] = useState<AutoUpdaterProps>({
     message: '',
-    updateAvailable: false
+    updateAvailable: false,
+    isError: false
   })
 
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null)
@@ -33,6 +35,11 @@ export default function Toolbar() {
       className="left-0 absolute bottom-0 w-screen h-4 flex gap-3 justify-between p-5"
     >
       <Version />
+      {updaterData.isError && (
+        <p className="self-center text-amber-300 flex row gap-2">
+          <IoWarning className="self-center" /> {updaterData.message}
+        </p>
+      )}
       {updaterData.updateAvailable && !downloadFinished && !downloadProgress && (
         <DownloadUpdateButton updaterData={updaterData} />
       )}

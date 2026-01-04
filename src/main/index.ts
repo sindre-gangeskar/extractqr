@@ -44,10 +44,22 @@ function createWindow(): BrowserWindow {
 
 app.whenReady().then(async () => {
   const win = createWindow()
+  win.webContents.on('before-input-event', (event, input) => {
+    if (is.dev) return
+
+    if (
+      input.type == 'keyDown' &&
+      input.key.toLowerCase() == 'r' &&
+      (input.control || input.meta)
+    ) {
+      event.preventDefault()
+    }
+  })
   electronApp.setAppUserModelId('com.electron')
   const updaterData: AutoUpdaterProps = {
     updateAvailable: false,
-    message: ''
+    message: '',
+    isError: false
   }
   const sendUpdaterData = () => {
     win.webContents.send('check-updates', updaterData)
@@ -130,12 +142,10 @@ app.whenReady().then(async () => {
     sendUpdaterData()
   })
 
-  autoUpdater.on('error', (err) => {
-    const isConnRefused = err.message.includes('ERR_CONNECTION_REFUSED')
-    if (!isConnRefused) console.error(err.message)
-    else console.log('Failed to fetch updates')
-    updaterData.message = 'Could not fetch updates'
+  autoUpdater.on('error', () => {
+    updaterData.message = 'Could not retrieve updates'
     updaterData.updateAvailable = false
+    updaterData.isError = true
     sendUpdaterData()
   })
 

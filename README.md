@@ -1,4 +1,5 @@
 # extractqr
+<img src=".github/assets/logo.png" width=200 height=200></img>
 
 A simple electron app used to scan QR codes in images and extract the QR data.
 

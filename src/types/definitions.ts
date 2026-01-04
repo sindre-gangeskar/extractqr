@@ -9,4 +9,5 @@ export interface IPCResponse {
 export interface AutoUpdaterProps {
   updateAvailable: boolean
   message: string
+  isError?: boolean
 }
